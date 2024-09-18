@@ -73,6 +73,14 @@ import {
             expect(BalAfterClaim).to.be.gt(BalBeforeClaim);
           });
 
+          it("Should not allow double claiming of reward.", async function(){
+            const { owner, addr1, airdrop, gtkcontractAddr, merkleRoot, addrWithNft, merkleProof, gtkTokenDeployed, BAYC_Contract, impersonatedSigner, addrWithoutNft } = await loadFixture(deployAirdrop);            
+            const amt = ethers.parseUnits("10", 18);
+            await airdrop.connect(impersonatedSigner).claimAirdrop(merkleProof, amt)
+           await expect(airdrop.connect(impersonatedSigner).claimAirdrop(merkleProof, amt)).to.be.revertedWith("NFT claimed already.");
+            
+          });
+
 
      })
 
