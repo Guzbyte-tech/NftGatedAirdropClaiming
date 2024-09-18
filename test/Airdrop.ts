@@ -38,17 +38,38 @@ import {
         await gtkTokenDeployed.transfer(airdrop, ethers.parseUnits("1000", 18));
 
 
-        return { owner, addr1, airdrop, gtkcontractAddr, merkleRoot, addrWithNft, merkleProof, gtkTokenDeployed, BAYC_Contract, impersonatedSigner, addrWithoutNft }
+        return { owner, addr1, airdrop, gtkcontractAddr, merkleRoot, addrWithNft, merkleProof, gtkTokenDeployed, BAYC_Contract, impersonatedSigner, addrWithoutNft, BAYC_ADDR }
     }
 
     describe('Claim Airdrop', () => { 
         it("Should check if address did not participated in airdrop", async function(){
+            const { owner, addr1, airdrop, gtkcontractAddr, merkleRoot, addrWithNft, merkleProof, gtkTokenDeployed, BAYC_Contract, impersonatedSigner, addrWithoutNft, BAYC_ADDR } = await loadFixture(deployAirdrop);
+            const amt = ethers.parseUnits("10", 18);
+            await expect(airdrop.connect(addr1).claimAirdrop(addr1, merkleProof, amt)).to.be.revertedWith("You don't have the BAYC NFT");
+        });
+
+        it("Should check if address has BAYC NFT", async function(){
+            const { owner, addr1, airdrop, gtkcontractAddr, merkleRoot, addrWithNft, merkleProof, gtkTokenDeployed, BAYC_Contract, impersonatedSigner, addrWithoutNft, BAYC_ADDR } = await loadFixture(deployAirdrop);
+            const amt = ethers.parseUnits("10", 18);
+            expect(await airdrop.connect(impersonatedSigner).checkForNft(BAYC_ADDR, impersonatedSigner)).to.equal(true);
+        });
+
+        it("Should check if address participated in airdrop", async function(){
             const { owner, addr1, airdrop, gtkcontractAddr, merkleRoot, addrWithNft, merkleProof, gtkTokenDeployed, BAYC_Contract, impersonatedSigner, addrWithoutNft } = await loadFixture(deployAirdrop);
             const amt = ethers.parseUnits("10", 18);
-            // const checkClaim = await airdrop.claimAirdrop(impersonatedSigner.getAddress(), merkleProof, amt);
-    
-            await expect( airdrop.connect(addr1).claimAirdrop(addr1, merkleProof, amt)).to.be.revertedWith("Invalid Merkle proof.");
+            await expect( airdrop.connect(impersonatedSigner).claimAirdrop(impersonatedSigner.getAddress(), merkleProof, amt)).to.not.be.reverted;
+        });
+
+        it("Should check if address claimed airdrop successfully.", async function(){
+            const { owner, addr1, airdrop, gtkcontractAddr, merkleRoot, addrWithNft, merkleProof, gtkTokenDeployed, BAYC_Contract, impersonatedSigner, addrWithoutNft } = await loadFixture(deployAirdrop);
+            const BalBeforeClaim = await gtkTokenDeployed.balanceOf(impersonatedSigner);
+            const amt = ethers.parseUnits("10", 18);
+            await airdrop.connect(impersonatedSigner).claimAirdrop(impersonatedSigner, merkleProof, amt)
+            const BalAfterClaim = await gtkTokenDeployed.balanceOf(impersonatedSigner);
+            expect(BalAfterClaim).to.be.gt(BalBeforeClaim);
           });
+
+
      })
 
     

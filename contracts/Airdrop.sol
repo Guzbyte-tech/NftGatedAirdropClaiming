@@ -27,7 +27,7 @@ contract Airdrop {
         require(msg.sender != address(0), "Zero address detected.");
         require(!hasClaimed[msg.sender], "NFT claimed already.");
         // Check that the user owns a BAYC NFT
-        require(!checkForNft(NftAddress, msg.sender), "You don't have the BAYC NFT");
+        require(checkForNft(NftAddress, msg.sender), "You don't have the BAYC NFT");
 
         bytes32 leaf = keccak256(
             bytes.concat(keccak256(abi.encode(_address, _amount)))
@@ -52,4 +52,6 @@ contract Airdrop {
     ) public view returns (bool) {
         return IERC721(_NFTContractAddress).balanceOf(user) > 0;
     }
+
+    // function checkForDoubleClaim
 }
