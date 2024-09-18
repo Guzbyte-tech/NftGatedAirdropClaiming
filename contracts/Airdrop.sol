@@ -19,7 +19,7 @@ contract Airdrop {
 
     //Claim Airdrop only when they NFT.
     function claimAirdrop(
-        address _address,
+        // address _address
         bytes32[] calldata _merkleProof,
         // uint256 _tokenId,
         uint256 _amount
@@ -27,10 +27,10 @@ contract Airdrop {
         require(msg.sender != address(0), "Zero address detected.");
         require(!hasClaimed[msg.sender], "NFT claimed already.");
         // Check that the user owns a BAYC NFT
-        require(checkForNft(NftAddress, msg.sender), "You don't have the BAYC NFT");
+        
 
         bytes32 leaf = keccak256(
-            bytes.concat(keccak256(abi.encode(_address, _amount)))
+            bytes.concat(keccak256(abi.encode(msg.sender, _amount)))
         );
 
         require(
@@ -38,12 +38,14 @@ contract Airdrop {
             "Invalid Merkle proof."
         );
 
-        hasClaimed[_address] = true;
+        require(checkForNft(NftAddress, msg.sender), "You don't have the BAYC NFT");
 
         require(
-            IERC20(tokenAddress).transfer(_address, _amount),
+            IERC20(tokenAddress).transfer(msg.sender, _amount),
             "Token transfer failed."
         );
+
+        hasClaimed[msg.sender] = true;
     }
 
     function checkForNft(
