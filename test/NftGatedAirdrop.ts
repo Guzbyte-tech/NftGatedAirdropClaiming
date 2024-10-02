@@ -7,7 +7,7 @@ import {
   import hre, { ethers } from "hardhat";
   const helpers = require("@nomicfoundation/hardhat-network-helpers");
 
-  describe("Airdrop", function(){
+  describe("NftGatedAirdrop", function(){
 
     async function deployGtkToken() {
         const [tokenOwner, addr1] = await ethers.getSigners();
@@ -16,7 +16,7 @@ import {
         const gtkTokenDeployed = await gtkToken.deploy();
         const gtkcontractAddr = await gtkTokenDeployed.getAddress();
         return { gtkcontractAddr, gtkTokenDeployed, tokenOwner };
-      }
+    }
 
     async function deployAirdrop() {
         // Get the ContractFactory and Signers here.
@@ -30,9 +30,11 @@ import {
         const merkleProof = ["0x9152e25333c8bf06a40469e24a6558f1de1d399e65d4b58fb2364eb27a5c4d40","0xd41b2560b2d3241cbee053e2cf34a92afa35638a8243cf815b53f430dd662604","0xe60074fff5169d08db90cfb7969e1a46ee8419f64523500128979e2ce14d66ed"
         ];
         const invalidMerkleProof = ["0x9152e25333c8bf06a40469e24a6558f1de1d399e65d4b58fb2364eb27a5c4d40","0xd41b2560b2d3241cbee053e2cf34a92afa35638a8243cf815b53f430dd662604","0xe60074fff5169d08db90cfb7969e1a46ee8419f64523500128979e2ce14d6600"
-        ]; // For non participants.
+        ]; 
+        
         const airdrop = await airdropContract.deploy(gtkcontractAddr, merkleRoot);
         
+        //Impersonate Address with NFT
         await helpers.impersonateAccount(addrWithNft);
         const impersonatedSigner = await ethers.getSigner(addrWithNft);
         const BAYC_Contract = await ethers.getContractAt("IERC721", BAYC_ADDR, impersonatedSigner);
